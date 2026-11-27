@@ -262,15 +262,15 @@ Esse comando gera o cliente utilizado pela API para acessar o banco de dados.
 ### 6. Executar as migrations
 
 ```bash
-npx prisma migrate deploy --schema=api/prisma/schema.prisma
+npm run migrate -w api
 ```
+Esse comando aplica as migrations ao PostgreSQL (cria as tabelas). Se o Prisma perguntar um nome para uma nova migration, não deve acontecer em um banco novo.
 
-As migrations aplicam ao PostgreSQL as alterações de estrutura definidas pelo projeto.
 
 ### 7. Popular o banco com dados de exemplo (seed)
 
 ```bash
-npx prisma db seed --schema=api/prisma/schema.prisma
+npm run seed -w api
 ```
 
 O seed preenche todas as tabelas com dados de exemplo e cria o usuário de teste descrito na seção abaixo.
