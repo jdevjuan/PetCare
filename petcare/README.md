@@ -1,51 +1,44 @@
-# PetCare
+# PetCare — monorepo
 
-Site de clínica veterinária e pet shop (projeto acadêmico de Desenvolvimento Web).
+React/Vite + Express + Prisma + PostgreSQL. Node 22 e Docker Compose recomendados.
 
-**Stack:** React + TypeScript + Vite + Tailwind CSS + React Router + Zod.
+## Executar localmente
 
-> Versão simplificada para publicar direto na Vercel: **não tem servidor nem banco externo**.
-> Os dados (usuários, animais, agendamentos...) ficam salvos no `localStorage` do navegador.
-> Cada navegador/computador tem os seus próprios dados.
-
-## Como rodar no seu PC
-
-Pré-requisito: Node.js 18 ou superior.
+Na raiz, execute:
 
 ```bash
 npm install
+docker compose up -d
+```
+
+Copie `api/.env.example` para `api/.env` (Windows PowerShell: `Copy-Item api/.env.example api/.env`; Linux/macOS: `cp api/.env.example api/.env`). Troque JWT_SECRET por uma chave aleatória longa.
+
+```bash
+npm run migrate -w api -- --name init
+npm run seed -w api
 npm run dev
 ```
 
-Abra o endereço que aparecer no terminal (normalmente http://localhost:5173).
+Frontend: http://localhost:5173. Swagger: http://localhost:3001/docs. API: http://localhost:3001/api.
 
-## Como publicar
+## Acesso de demonstração
 
-```bash
-npm run build
-```
+Professor (administrador): `professor@petcare.com` / `Professor123!`.
+Cliente: `cliente@petcare.com` / `Professor123!`.
+Credenciais apenas para desenvolvimento. Cadastros públicos sempre criam clientes.
 
-O resultado fica na pasta `dist/`. Na Vercel, basta importar o repositório do GitHub (o framework Vite é detectado automaticamente). O arquivo `vercel.json` garante que o React Router funcione ao recarregar a página.
+## Organização
 
-## Como usar
+- shared: schemas Zod e tipos de entrada.
+- api: routes, controllers, services, repositories, middlewares e Prisma.
+- frontend: interface original, conectada à API via proxy Vite. Dados persistem no PostgreSQL; token de sessão no sessionStorage.
 
-1. Acesse **Criar conta**. **O primeiro cadastro vira administrador** (não existe senha padrão).
-2. Os próximos cadastros são **clientes**.
-3. Cliente: cadastra animais, agenda serviços, acompanha o status e vê o histórico.
-4. Administrador: gerencia serviços, confirma/cancela agendamentos, registra consultas e pagamentos.
+CRUD GET/POST `/api/{pets,services,appointments,consultations,payments}` e GET/PUT/DELETE `/:id`. Use o token retornado pelo login no botão Authorize do Swagger. Clientes acessam seus próprios animais, agendamentos e histórico; alterações administrativas exigem perfil ADMIN. Exclusões de registros referenciados são bloqueadas com 400 para preservar histórico. O cadastro de serviço e usuário tem campos únicos. Agendamentos relacionam animais e serviços; consultas e pagamentos também possuem chaves estrangeiras.
 
-Para zerar os dados: login como administrador > Painel > **Restaurar dados iniciais**.
+## Verificação
 
-## Estrutura
+`npm run typecheck` e `npm run build` na raiz. Teste login, CRUD, duplicidade, validação e autorização no Swagger. A migration SQL inicial foi preparada manualmente porque o ambiente de edição não possui PostgreSQL/Docker nem acesso ao npm. Execute `prisma migrate dev` conforme acima e confira se o Prisma identifica divergências antes de publicar. Não foi possível executar testes de integração neste ambiente.
 
-```
-src/
-  lib/          storage.ts (dados), api.ts (regras e permissões), validators.ts (Zod), format.ts
-  context/      AuthContext (login), ToastContext (mensagens)
-  components/   layouts, rotas protegidas e componentes visuais
-  pages/        public/, client/ e admin/
-```
+## GitHub
 
-## Observação de segurança
-
-Como tudo roda no navegador, esta versão é uma **demonstração**: as regras de permissão existem no código (`src/lib/api.ts`), mas um usuário técnico consegue alterar o `localStorage` do próprio navegador. Para um produto real, o ideal é mover `api.ts` para um backend (Node/Express + banco de dados).
+Copie os arquivos para o repositório original, revise `git status`, inclua `api/prisma/migrations` e o lockfile gerado por npm install. Nunca inclua `api/.env`, node_modules ou dist. Nenhum push foi realizado.

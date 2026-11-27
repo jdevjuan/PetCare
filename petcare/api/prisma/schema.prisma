@@ -1,0 +1,81 @@
+generator client {
+  provider = "prisma-client-js"
+}
+datasource db {
+  provider = "postgresql"
+  url = env("DATABASE_URL")
+}
+
+model User {
+  id String @id @default(uuid())
+  createdAt DateTime @default(now())
+  name String
+  email String @unique
+  phone String
+  passwordHash String
+  role String @default("CLIENT")
+  pets Pet[]
+}
+
+model Pet {
+  id String @id @default(uuid())
+  createdAt DateTime @default(now())
+  name String
+  species String
+  breed String
+  birthDate String
+  weight Float
+  observations String
+  ownerId String
+  owner User @relation(fields: [ownerId], references: [id])
+  appointments Appointment[]
+  consultations Consultation[]
+}
+
+model Service {
+  id String @id @default(uuid())
+  createdAt DateTime @default(now())
+  name String @unique
+  description String
+  price Float
+  duration Int
+  active Boolean
+  appointments Appointment[]
+}
+
+model Appointment {
+  id String @id @default(uuid())
+  createdAt DateTime @default(now())
+  petId String
+  serviceId String
+  date DateTime
+  status String @default("PENDING")
+  notes String
+  pet Pet @relation(fields: [petId], references: [id])
+  service Service @relation(fields: [serviceId], references: [id])
+  consultations Consultation[]
+  payment Payment?
+}
+
+model Consultation {
+  id String @id @default(uuid())
+  createdAt DateTime @default(now())
+  petId String
+  appointmentId String?
+  veterinarian String
+  diagnosis String
+  notes String
+  date DateTime
+  pet Pet @relation(fields: [petId], references: [id])
+  appointment Appointment? @relation(fields: [appointmentId], references: [id])
+}
+
+model Payment {
+  id String @id @default(uuid())
+  createdAt DateTime @default(now())
+  appointmentId String @unique
+  amount Float
+  status String
+  paymentMethod String?
+  appointment Appointment @relation(fields: [appointmentId], references: [id])
+}
