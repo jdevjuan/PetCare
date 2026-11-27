@@ -1,8 +1,45 @@
 # 🐾 PetCare — Sistema de Gestão Veterinária
 
-Sistema web de gerenciamento para clínicas veterinárias e pet shops, desenvolvido para facilitar o controle de clientes, animais, serviços, agendamentos, consultas e pagamentos.
+## Link do vídeo no YouTube
+https://www.youtube.com/watch?v=UC4T6_nTVyk
+
+---
+
+## Tema
+
+**PetCare** é um sistema web para uma **clínica veterinária e pet shop**. Ele controla os tutores, os animais, os serviços oferecidos (banho, tosa, vacina, consulta), os agendamentos e o histórico de consultas veterinárias.
 
 O projeto utiliza uma arquitetura organizada em monorepo, com frontend, API e código compartilhado, além de PostgreSQL como banco de dados e Prisma ORM para gerenciamento das informações.
+
+---
+
+## Equipe e divisão de trabalho
+
+| Integrante | RGM | Papel principal |
+| --- | --- | --- |
+| Francisco Juan | 44184913 | Estrutura do projeto, regras de negócio e banco de dados |
+| Artur Mota | 43726844 | Interface, identidade visual, conteúdo e documentação |
+
+### Juan — base técnica
+- Definição da arquitetura do projeto (frontend, API e pacote `shared`)
+- Modelagem do banco de dados com Prisma e PostgreSQL (tabelas, relacionamentos, migrations e seed)
+- Autenticação, permissões e regras de agendamento
+- Publicação do projeto
+
+### Artur — interface e experiência do usuário
+- Refinamento visual das páginas públicas: Home, Sobre e Contato
+- Escrita dos textos e do conteúdo institucional da clínica
+- Seção "Como funciona", perguntas frequentes e rodapé de navegação
+- Telas de login e cadastro
+- Busca de serviços e ajustes dos painéis do cliente e do administrador
+- Revisão de cores, ícones e responsividade (celular e computador)
+- Testes manuais dos fluxos de cliente e administrador
+- Elaboração e revisão deste README
+
+### Trabalho em conjunto
+- Definição das funcionalidades e do tema do projeto
+- Revisão e testes antes da entrega
+- Preparação da apresentação
 
 ---
 
@@ -20,6 +57,65 @@ O projeto utiliza uma arquitetura organizada em monorepo, com frontend, API e c�
 | Docker | Execução do PostgreSQL em container |
 | Zod | Validação de dados |
 | JWT | Autenticação de usuários |
+
+---
+
+## 🗃️ Tabelas do banco e ligações
+
+O banco é PostgreSQL, modelado com Prisma (`api/prisma/schema.prisma`). O sistema tem **5 tabelas de negócio** (Pet, Service, Appointment, Consultation e Payment) e uma tabela de **usuários para o login** (User).
+
+| Tabela | Descrição | Campos principais | Ligações (chave estrangeira) |
+| --- | --- | --- | --- |
+| `User` | Usuários que fazem login (tutores e administradores) | name, **email (único)**, phone, passwordHash (hash bcrypt), role (`CLIENT` ou `ADMIN`) | Um usuário tem vários pets |
+| `Pet` | Animais atendidos | name, species, breed, birthDate, weight, observations | `ownerId` → `User` |
+| `Service` | Serviços da clínica | **name (único)**, description, price, duration, active | Um serviço aparece em vários agendamentos |
+| `Appointment` | Serviço marcado para um pet | date, status, notes | `petId` → `Pet` e `serviceId` → `Service` (liga **duas** tabelas) |
+| `Consultation` | Histórico veterinário | veterinarian, diagnosis, notes, date | `petId` → `Pet` e `appointmentId` → `Appointment` (opcional) |
+| `Payment` | Registro de pagamento de um agendamento | amount, status, paymentMethod | `appointmentId` → `Appointment` (**único**, relação 1 para 1) |
+
+### Relacionamentos
+
+- Um **User** possui vários **Pets** (1 para N).
+- Um **Pet** possui vários **Appointments** e várias **Consultations** (1 para N).
+- Um **Service** está em vários **Appointments** (1 para N).
+- Um **Appointment** pode originar várias **Consultations** (1 para N, opcional).
+- Um **Appointment** tem no máximo um **Payment** (1 para 1).
+
+### Diagrama
+
+```mermaid
+erDiagram
+    USER ||--o{ PET : possui
+    PET ||--o{ APPOINTMENT : tem
+    SERVICE ||--o{ APPOINTMENT : "é solicitado em"
+    PET ||--o{ CONSULTATION : recebe
+    APPOINTMENT |o--o{ CONSULTATION : origina
+    APPOINTMENT ||--o| PAYMENT : gera
+    USER {
+        string id PK
+        string email UK
+        string passwordHash
+        string role
+    }
+    SERVICE {
+        string id PK
+        string name UK
+    }
+    PAYMENT {
+        string id PK
+        string appointmentId UK
+    }
+```
+
+### Campos únicos (`@unique`)
+
+- `User.email`: não permite dois usuários com o mesmo e-mail.
+- `Service.name`: não permite dois serviços com o mesmo nome.
+- `Payment.appointmentId`: cada agendamento tem no máximo um pagamento.
+
+### Regras de exclusão
+
+O banco impede apagar um registro que tenha outros ligados a ele (por exemplo, um pet com agendamentos). A exceção é `Consultation.appointmentId`, que é opcional: se o agendamento for apagado, a consulta continua, com o campo vazio.
 
 ---
 
@@ -62,10 +158,8 @@ PetCare/
 
 - **Frontend:** interface utilizada pelos clientes e administradores.
 - **API:** responsável pela comunicação entre frontend e banco de dados.
-- **Controllers:** organização do processamento das requisições.
-- **Services:** regras de negócio e autenticação.
-- **Repositories:** acesso aos dados.
-- **Middlewares:** validação e verificações das requisições.
+- **Routes → Controllers → Services → Repositories:** as camadas da API. As rotas definem os endereços, os controllers recebem e respondem as requisições, os services concentram as regras de negócio e os repositories acessam o banco.
+- **Middlewares:** validação dos dados (Zod) e verificação do token de login.
 - **Shared:** compartilhamento de schemas e tipos TypeScript.
 - **Prisma:** modelagem e gerenciamento do banco de dados.
 
@@ -173,13 +267,32 @@ npx prisma migrate deploy --schema=api/prisma/schema.prisma
 
 As migrations aplicam ao PostgreSQL as alterações de estrutura definidas pelo projeto.
 
-### 7. Iniciar a aplicação
+### 7. Popular o banco com dados de exemplo (seed)
+
+```bash
+npx prisma db seed --schema=api/prisma/schema.prisma
+```
+
+O seed preenche todas as tabelas com dados de exemplo e cria o usuário de teste descrito na seção abaixo.
+
+### 8. Iniciar a aplicação
 
 ```bash
 npm run dev
 ```
 
 O comando inicia simultaneamente o frontend e a API.
+
+---
+
+## 🔑 Acesso para o professor
+
+Depois de rodar o seed, use um destes usuários para entrar no sistema:
+
+| Perfil | E-mail | Senha |
+|---|---|---|
+| Administrador (acesso completo) | `professor@petcare.com` | `Professor123!` |
+| Cliente (área do tutor) | `cliente@petcare.com` | `Professor123!` |
 
 ---
 
@@ -239,7 +352,7 @@ Principais recursos utilizados:
 - **Schema:** define os modelos e relacionamentos do banco.
 - **Migrations:** registra e aplica alterações na estrutura do banco.
 - **Prisma Client:** permite executar consultas e operações utilizando TypeScript.
-- **Seed:** permite inserir dados iniciais no banco, conforme a implementação do projeto.
+- **Seed:** insere dados iniciais de exemplo no banco.
 
 Os arquivos relacionados ao Prisma estão localizados em:
 
