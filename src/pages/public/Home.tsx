@@ -1,5 +1,5 @@
 import { Link } from 'react-router-dom';
-import { ArrowRight, CalendarDays, FileText, PawPrint, ShieldCheck } from 'lucide-react';
+import { ArrowRight, CalendarCheck, CalendarDays, FileText, PawPrint, ShieldCheck, UserPlus } from 'lucide-react';
 import ServiceList from '../../components/ServiceList';
 import { Button, Card } from '../../components/ui';
 import { useAuth } from '../../context/AuthContext';
@@ -22,6 +22,13 @@ const features = [
     title: 'Histórico veterinário',
     text: 'Consulte diagnósticos e atendimentos anteriores quando precisar.',
   },
+];
+
+const steps = [
+  { icon: UserPlus, title: '1. Crie sua conta', text: 'O cadastro leva menos de um minuto.' },
+  { icon: PawPrint, title: '2. Cadastre seu pet', text: 'Informe espécie, raça, peso e observações.' },
+  { icon: CalendarDays, title: '3. Escolha o serviço', text: 'Veja preço e duração antes de agendar.' },
+  { icon: CalendarCheck, title: '4. Aguarde a confirmação', text: 'A clínica confirma e você acompanha o status.' },
 ];
 
 export default function Home() {
@@ -72,7 +79,7 @@ export default function Home() {
       <section className="mx-auto max-w-6xl px-4 py-16">
         <div className="grid gap-5 md:grid-cols-3">
           {features.map((f) => (
-            <Card key={f.title}>
+            <Card key={f.title} className="transition hover:-translate-y-0.5 hover:shadow-md">
               <div className="mb-3 flex h-11 w-11 items-center justify-center rounded-xl bg-teal-50 text-teal-700">
                 <f.icon className="h-5 w-5" />
               </div>
@@ -95,6 +102,42 @@ export default function Home() {
         </div>
         <ServiceList services={services} />
       </section>
+
+      <section className="bg-white">
+        <div className="mx-auto max-w-6xl px-4 py-16">
+          <h2 className="text-center text-2xl font-extrabold text-slate-900">Como funciona</h2>
+          <p className="mx-auto mb-10 mt-1 max-w-md text-center text-sm text-slate-500">
+            Do cadastro ao atendimento em quatro passos simples.
+          </p>
+          <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-4">
+            {steps.map((s) => (
+              <div key={s.title} className="text-center">
+                <div className="mx-auto mb-3 flex h-14 w-14 items-center justify-center rounded-2xl bg-teal-50 text-teal-700">
+                  <s.icon className="h-7 w-7" />
+                </div>
+                <h3 className="font-bold text-slate-900">{s.title}</h3>
+                <p className="mt-1 text-sm text-slate-500">{s.text}</p>
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {!user && (
+        <section className="mx-auto max-w-6xl px-4 py-16">
+          <div className="rounded-3xl bg-teal-800 px-6 py-12 text-center text-white">
+            <h2 className="text-2xl font-extrabold sm:text-3xl">Pronto para cuidar do seu melhor amigo?</h2>
+            <p className="mx-auto mt-2 max-w-md text-teal-100">
+              Crie sua conta e faça o primeiro agendamento ainda hoje.
+            </p>
+            <Link to="/cadastro" className="mt-6 inline-block">
+              <Button variant="secondary" className="px-6 py-3 text-base">
+                Criar minha conta
+              </Button>
+            </Link>
+          </div>
+        </section>
+      )}
     </>
   );
 }

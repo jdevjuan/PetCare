@@ -1,7 +1,8 @@
 import { useState } from 'react';
 import type { FormEvent } from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
-import { Button, Card, Field } from '../../components/ui';
+import AuthShell from '../../components/AuthShell';
+import { Button, Field } from '../../components/ui';
 import { useAuth } from '../../context/AuthContext';
 import { useToast } from '../../context/ToastContext';
 import { errorMessage, homeFor } from '../../lib/format';
@@ -30,40 +31,38 @@ export default function Login() {
   };
 
   return (
-    <div className="mx-auto max-w-md px-4 py-14">
-      <h1 className="text-center text-3xl font-extrabold text-slate-900">Entrar</h1>
-      <p className="mb-6 mt-1 text-center text-slate-500">Acesse sua conta para continuar.</p>
-      <Card>
-        <form onSubmit={handleSubmit} className="space-y-4">
-          <Field label="E-mail">
-            <input
-              className="input"
-              type="email"
-              autoComplete="email"
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-            />
-          </Field>
-          <Field label="Senha">
-            <input
-              className="input"
-              type="password"
-              autoComplete="current-password"
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-            />
-          </Field>
-          <Button type="submit" loading={loading} className="w-full">
-            Entrar
-          </Button>
-        </form>
-      </Card>
-      <p className="mt-4 text-center text-sm text-slate-500">
+    <AuthShell title="Bem-vindo de volta" subtitle="Entre na sua conta para continuar.">
+      <form onSubmit={handleSubmit} className="space-y-4">
+        <Field label="E-mail">
+          <input
+            className="input"
+            type="email"
+            autoComplete="email"
+            placeholder="voce@email.com"
+            value={email}
+            onChange={(e) => setEmail(e.target.value)}
+          />
+        </Field>
+        <Field label="Senha">
+          <input
+            className="input"
+            type="password"
+            autoComplete="current-password"
+            placeholder="Sua senha"
+            value={password}
+            onChange={(e) => setPassword(e.target.value)}
+          />
+        </Field>
+        <Button type="submit" loading={loading} className="w-full">
+          Entrar
+        </Button>
+      </form>
+      <p className="mt-5 text-center text-sm text-slate-500">
         Ainda não tem conta?{' '}
         <Link to="/cadastro" className="font-bold text-teal-700 hover:underline">
           Cadastre-se
         </Link>
       </p>
-    </div>
+    </AuthShell>
   );
 }

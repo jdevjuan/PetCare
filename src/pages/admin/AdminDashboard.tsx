@@ -1,5 +1,5 @@
-import { useNavigate } from 'react-router-dom';
-import { CalendarCheck, Clock, FileText, PawPrint, Users } from 'lucide-react';
+import { Link, useNavigate } from 'react-router-dom';
+import { ArrowRight, CalendarCheck, CalendarDays, Clock, FileText, PawPrint, Stethoscope, Users } from 'lucide-react';
 import { Button, Card, PageHeader } from '../../components/ui';
 import { useAuth } from '../../context/AuthContext';
 import { getAdminStats, resetAllData } from '../../lib/api';
@@ -18,6 +18,12 @@ export default function AdminDashboard() {
   ];
 
   const maxCount = Math.max(1, ...stats.topServices.map((s) => s.count));
+
+  const shortcuts = [
+    { to: '/admin/agendamentos', icon: CalendarDays, label: 'Gerenciar agendamentos' },
+    { to: '/admin/servicos', icon: Stethoscope, label: 'Editar serviços e preços' },
+    { to: '/admin/consultas', icon: FileText, label: 'Registrar consulta' },
+  ];
 
   const handleReset = () => {
     if (!window.confirm('Apagar TODOS os dados deste navegador e voltar ao estado inicial?')) return;
@@ -41,6 +47,22 @@ export default function AdminDashboard() {
               <p className="text-xs font-medium text-slate-500">{c.label}</p>
             </div>
           </Card>
+        ))}
+      </div>
+
+      <div className="mb-8 grid gap-4 sm:grid-cols-3">
+        {shortcuts.map((s) => (
+          <Link
+            key={s.to}
+            to={s.to}
+            className="group flex items-center justify-between gap-3 rounded-2xl bg-teal-800 px-5 py-4 text-sm font-bold text-white transition hover:bg-teal-900"
+          >
+            <span className="flex items-center gap-3">
+              <s.icon className="h-5 w-5 text-teal-200" />
+              {s.label}
+            </span>
+            <ArrowRight className="h-4 w-4 transition group-hover:translate-x-1" />
+          </Link>
         ))}
       </div>
 

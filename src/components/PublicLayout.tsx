@@ -1,5 +1,5 @@
-import { useState } from 'react';
-import { Link, NavLink, Outlet } from 'react-router-dom';
+import { useEffect, useState } from 'react';
+import { Link, NavLink, Outlet, useLocation } from 'react-router-dom';
 import { Menu, X } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 import { homeFor } from '../lib/format';
@@ -16,6 +16,12 @@ const links = [
 export default function PublicLayout() {
   const { user } = useAuth();
   const [open, setOpen] = useState(false);
+  const { pathname } = useLocation();
+
+  // Ao trocar de página, volta para o topo.
+  useEffect(() => {
+    window.scrollTo(0, 0);
+  }, [pathname]);
 
   const linkClass = ({ isActive }: { isActive: boolean }) =>
     `rounded-lg px-3 py-2 text-sm font-semibold transition ${
@@ -99,9 +105,16 @@ export default function PublicLayout() {
       </main>
 
       <footer className="border-t border-slate-200 bg-white">
-        <div className="mx-auto flex max-w-6xl flex-col items-center justify-between gap-3 px-4 py-8 text-sm text-slate-500 sm:flex-row">
+        <div className="mx-auto flex max-w-6xl flex-col items-center justify-between gap-4 px-4 py-8 text-sm text-slate-500 sm:flex-row">
           <Logo />
-          <p>Projeto acadêmico de Desenvolvimento Web - PetCare</p>
+          <nav className="flex flex-wrap justify-center gap-4 font-semibold">
+            {links.map((l) => (
+              <Link key={l.to} to={l.to} className="hover:text-teal-700">
+                {l.label}
+              </Link>
+            ))}
+          </nav>
+          <p>Projeto acadêmico de Desenvolvimento Web</p>
         </div>
       </footer>
     </div>

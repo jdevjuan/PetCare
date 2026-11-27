@@ -2,7 +2,8 @@ import { useState } from 'react';
 import type { ChangeEvent, FormEvent } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { ShieldCheck } from 'lucide-react';
-import { Button, Card, Field } from '../../components/ui';
+import AuthShell from '../../components/AuthShell';
+import { Button, Field } from '../../components/ui';
 import { useAuth } from '../../context/AuthContext';
 import { useToast } from '../../context/ToastContext';
 import { hasUsers } from '../../lib/api';
@@ -34,10 +35,7 @@ export default function Register() {
   };
 
   return (
-    <div className="mx-auto max-w-md px-4 py-14">
-      <h1 className="text-center text-3xl font-extrabold text-slate-900">Criar conta</h1>
-      <p className="mb-6 mt-1 text-center text-slate-500">Leva menos de um minuto.</p>
-
+    <AuthShell title="Criar conta" subtitle="Leva menos de um minuto.">
       {firstAccount && (
         <div className="mb-4 flex items-start gap-2 rounded-xl border border-teal-200 bg-teal-50 p-3 text-sm text-teal-900">
           <ShieldCheck className="mt-0.5 h-4 w-4 shrink-0" />
@@ -48,37 +46,37 @@ export default function Register() {
         </div>
       )}
 
-      <Card>
-        <form onSubmit={handleSubmit} className="space-y-4">
-          <Field label="Nome completo">
-            <input className="input" autoComplete="name" value={form.name} onChange={set('name')} />
-          </Field>
+      <form onSubmit={handleSubmit} className="space-y-4">
+        <Field label="Nome completo">
+          <input className="input" autoComplete="name" value={form.name} onChange={set('name')} />
+        </Field>
+        <div className="grid gap-4 sm:grid-cols-2">
           <Field label="E-mail">
             <input className="input" type="email" autoComplete="email" value={form.email} onChange={set('email')} />
           </Field>
           <Field label="Telefone">
             <input className="input" type="tel" autoComplete="tel" value={form.phone} onChange={set('phone')} />
           </Field>
-          <Field label="Senha" hint="Mínimo de 6 caracteres.">
-            <input
-              className="input"
-              type="password"
-              autoComplete="new-password"
-              value={form.password}
-              onChange={set('password')}
-            />
-          </Field>
-          <Button type="submit" loading={loading} className="w-full">
-            Criar conta
-          </Button>
-        </form>
-      </Card>
-      <p className="mt-4 text-center text-sm text-slate-500">
+        </div>
+        <Field label="Senha" hint="Mínimo de 6 caracteres.">
+          <input
+            className="input"
+            type="password"
+            autoComplete="new-password"
+            value={form.password}
+            onChange={set('password')}
+          />
+        </Field>
+        <Button type="submit" loading={loading} className="w-full">
+          Criar conta
+        </Button>
+      </form>
+      <p className="mt-5 text-center text-sm text-slate-500">
         Já tem conta?{' '}
         <Link to="/entrar" className="font-bold text-teal-700 hover:underline">
           Entrar
         </Link>
       </p>
-    </div>
+    </AuthShell>
   );
 }

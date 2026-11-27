@@ -49,6 +49,18 @@ export default function ClientDashboard() {
         ))}
       </div>
 
+      {stats.petCount === 0 && (
+        <div className="mb-8 rounded-2xl bg-gradient-to-r from-teal-700 to-teal-800 p-6 text-white">
+          <p className="text-lg font-extrabold">Comece cadastrando seu primeiro pet</p>
+          <p className="mt-1 text-sm text-teal-100">
+            Com o animal cadastrado, você já pode agendar banho, tosa, vacinas e consultas.
+          </p>
+          <Link to="/app/animais/novo" className="mt-4 inline-block">
+            <Button variant="secondary">Cadastrar meu pet</Button>
+          </Link>
+        </div>
+      )}
+
       <h2 className="mb-3 text-lg font-extrabold text-slate-900">Próximos agendamentos</h2>
       {stats.upcoming.length === 0 ? (
         <EmptyState
